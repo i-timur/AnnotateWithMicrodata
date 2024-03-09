@@ -1,11 +1,13 @@
+#!/usr/bin/env python3
+
 import os
 
 import typer
 
 from rich import print
-from classifier import Classifier
-from segmenter import Segmenter
-from utils import clear_string, CLASS_MAP
+from src.microdata.classifier import Classifier
+from src.microdata.segmenter import Segmenter
+from src.microdata.utils import clear_string, CLASS_MAP
 from PyInquirer import prompt
 
 CONFIDENCE_THRESHOLD = 0.5
@@ -14,7 +16,7 @@ EMPTY_CATEGORY = "Skip"
 app = typer.Typer()
 
 @app.command("annotate")
-def annotate(inline: str = "", filepath: str = "", output = "") -> None:
+def annotate(inline: str = "", filepath: str= "", output: str = "") -> None:
     html = ""
 
     if inline:
@@ -68,12 +70,14 @@ def annotate(inline: str = "", filepath: str = "", output = "") -> None:
                 for selector in record["css_selector"]:
                     soup = segmenter.soup
                     element = soup.select(selector)[0]
+                    # TODO: Add empty itemtype attribute to the element.
                     element["itemscope"] = ""
                     element["itemtype"] = CLASS_MAP[category_idx]
             else:
                 for selector in record["css_selector"]:
                     soup = segmenter.soup
                     element = soup.select(selector)[0]
+                    # TODO: Add empty itemtype attribute to the element.
                     element["itemscope"] = ""
                     element["itemtype"] = CLASS_MAP[max_idx]
 
@@ -93,5 +97,5 @@ def annotate(inline: str = "", filepath: str = "", output = "") -> None:
     else:
         print(result)
 
-if __name__ == "__main__":
+def main():
     app()
