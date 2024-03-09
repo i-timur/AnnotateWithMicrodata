@@ -1,18 +1,18 @@
+from typing import List, Any
+
 import bs4
 
 from bs4 import BeautifulSoup
 
 class Segmenter:
-    def __init__(self, html: str) -> None:
-        self.soup = BeautifulSoup(html, 'html.parser')
-
-    def segment_html(self):
-        self.__pruning()
+    def segment_html(self, html: str) -> dict:
+        self.__pruning(html)
         self.__partial_tree_matching()
         self.__backtracking()
         return self.__output()
 
-    def __pruning(self) -> None:
+    def __pruning(self, html: str) -> None:
+        self.soup = BeautifulSoup(html, "html.parser")
         body = self.soup.find("body")
         body["lid"] = str(-1)
         body["sn"] = str(1)
@@ -77,9 +77,10 @@ class Segmenter:
                     max_window_size = len(current_window)
                     self.__mark_extracted(current_window)
                     break
+
             i += 1
 
-    def __mark_extracted(self, nodes) -> None:
+    def __mark_extracted(self, nodes: List[Any]) -> None:
         for node in nodes:
             node["extracted"] = ""
             lid = node["lid"]
@@ -96,19 +97,19 @@ class Segmenter:
                         node_cols.append(child)
                 col["extracted"] = ""
 
-    def __compare_nodes(self, nodes1, nodes2):
+    def __compare_nodes(self, nodes1: List[Any], nodes2: List[Any]) -> bool:
         if len(nodes1) == 0 or len(nodes2) == 0:
             return False
 
         return self.__get_nodes_children_structure(nodes1) == self.__get_nodes_children_structure(nodes2)
 
-    def __get_nodes_children_structure(self, nodes):
+    def __get_nodes_children_structure(self, nodes: List[Any]):
         structure = ""
         for node in nodes:
             structure += self.__get_node_children_structure(node)
         return structure
 
-    def __get_node_children_structure(self, node):
+    def __get_node_children_structure(self, node: Any) -> str:
         nodes = [node]
         structure = ""
         for node in nodes:
@@ -118,14 +119,14 @@ class Segmenter:
             structure += node.name
         return structure
 
-    def __backtracking(self):
+    def __backtracking(self) -> None:
         for node in self.all_nodes:
             if (node.name != "body") and (node.parent is not None) and ("extracted" not in node.attrs) and (
                     "extracted" in node.parent.attrs):
                 self.blocks.append([node])
                 self.__mark_extracted([node])
 
-    def __get_element(self, node):
+    def __get_element(self, node: Any) -> str:
         length = 1
         for previous_node in list(node.previous_siblings):
             if isinstance(previous_node, bs4.element.Tag):
@@ -135,7 +136,7 @@ class Segmenter:
         else:
             return node.name
 
-    def __get_css_selector(self, node: bs4.element.Tag) -> str:
+    def __get_css_selector(self, node: Any) -> str:
         path = [self.__get_element(node)]
         for parent in node.parents:
             if parent.name == "[document]":
@@ -145,7 +146,7 @@ class Segmenter:
 
         return ' > '.join(path)
 
-    def __output(self):
+    def __output(self) -> dict:
         segment_ids = []
         record_id = 0
         segments = dict()
@@ -171,8 +172,8 @@ class Segmenter:
             segment_id = str(segment_ids.index(lid))
 
             if segment_id not in segments:
-                segments[segment_id] = {"segment_id": int(segment_id), "css_selector": self.__get_css_selector(block[0].parent),
-                             "records": []}
+                segments[segment_id] = {"segment_id": int(segment_id),
+                                        "css_selector": self.__get_css_selector(block[0].parent), "records": []}
 
             segments[segment_id]["records"].append(
                 {"record_id": record_id, "texts": texts, "css_selector": css_selectors})
