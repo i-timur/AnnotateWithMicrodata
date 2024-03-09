@@ -35,7 +35,6 @@ def annotate(inline: str = "", filepath: str = "", output = "") -> None:
     # TODO: Validate HTML before proceeding.
     segmenter = Segmenter()
     segments = segmenter.segment_html(html)
-    print(segments)
     classifier = Classifier()
 
     for segment_id, segment in segments.items():
