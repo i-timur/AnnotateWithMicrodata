@@ -351,3 +351,4 @@ dmypy.json
 .pyre/
 .pytype/
 cython_debug/
+src/test
