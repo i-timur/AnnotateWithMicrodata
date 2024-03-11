@@ -5,9 +5,9 @@ import os
 import typer
 
 from rich import print
-from src.microdata.classifier import Classifier
-from src.microdata.segmenter import Segmenter
-from src.microdata.utils import clear_string, CLASS_MAP
+from src.classifier import Classifier
+from src.segmenter import Segmenter
+from src.utils import clear_string, CLASS_MAP
 from PyInquirer import prompt
 
 CONFIDENCE_THRESHOLD = 0.5
@@ -16,7 +16,7 @@ EMPTY_CATEGORY = "Skip"
 app = typer.Typer()
 
 @app.command("annotate")
-def annotate(inline: str = "", filepath: str= "", output: str = "") -> None:
+def annotate(inline: str = "", filepath: str = "", output: str = "") -> None:
     html = ""
 
     if inline:
