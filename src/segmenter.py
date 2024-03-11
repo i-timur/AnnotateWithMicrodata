@@ -5,14 +5,25 @@ import bs4
 from bs4 import BeautifulSoup
 
 class Segmenter:
-    def segment_html(self, html: str) -> dict:
-        self.__pruning(html)
+    def __init__(self):
+        self.soup = None
+
+    def segment_html(self, html: str, clear_tree: bool = True) -> dict:
+        self.soup = BeautifulSoup(html, "html.parser")
+        self.__pruning()
         self.__partial_tree_matching()
         self.__backtracking()
-        return self.__output()
+        result = self.__output()
 
-    def __pruning(self, html: str) -> None:
-        self.soup = BeautifulSoup(html, "html.parser")
+        if clear_tree:
+            self.__clear_tree()
+
+        return result
+
+    def __pruning(self) -> None:
+        if not self.soup:
+            raise ValueError("Soup is not instantiated.")
+
         body = self.soup.find("body")
         body["lid"] = str(-1)
         body["sn"] = str(1)
@@ -180,3 +191,13 @@ class Segmenter:
             record_id += 1
 
         return segments
+
+    def __clear_tree(self) -> None:
+        if not self.soup:
+            raise ValueError("Soup is not instantiated.")
+
+        attributes = ["lid", "sn", "extracted", "sid"]
+
+        for attribute in attributes:
+            for node in self.soup.find_all(attrs={attribute: True}):
+                del node[attribute]

@@ -70,19 +70,14 @@ def annotate(inline: str = "", filepath: str = "", output: str = "") -> None:
                 for selector in record["css_selector"]:
                     soup = segmenter.soup
                     element = soup.select(selector)[0]
-                    # TODO: Add empty itemtype attribute to the element.
-                    element["itemscope"] = ""
+                    element["itemscope"] = None
                     element["itemtype"] = CLASS_MAP[category_idx]
             else:
                 for selector in record["css_selector"]:
                     soup = segmenter.soup
                     element = soup.select(selector)[0]
-                    # TODO: Add empty itemtype attribute to the element.
-                    element["itemscope"] = ""
+                    element["itemscope"] = None
                     element["itemtype"] = CLASS_MAP[max_idx]
-
-
-    # TODO: Clear the tree from the tags that were added during the annotation process.
 
     result = segmenter.soup.prettify()
 
