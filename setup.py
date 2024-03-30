@@ -6,6 +6,6 @@ setup(
     author="Timur Ibragimov",
     packages=find_packages(),
     entry_points={
-        "console_scripts": ["microdata = src.cli:main"]
+        "console_scripts": ["microdata = src.cli.cli:cli"]
     }
 )
