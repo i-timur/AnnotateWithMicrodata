@@ -16,8 +16,8 @@ def cli():
 @click.argument('html', type=HTMLInput(), required=True)
 @click.option('-o', '--output', 'output', type=str, help='Path to the output file', required=False)
 def annotate(html, output):
-    segmenter = Segmenter()
-    segments = segmenter.segment_html(html)
+    splitter = Segmenter()
+    segments = splitter.segment_html(html)
     classifier = Classifier()
 
     for segment_id, segment in segments.items():
@@ -50,18 +50,18 @@ def annotate(html, output):
                 # category_idx = list(CLASS_MAP.values()).index(category)
                 #
                 # for selector in record["css_selector"]:
-                #     soup = segmenter.soup
+                #     soup = splitter.soup
                 #     element = soup.select(selector)[0]
                 #     element["itemscope"] = None
                 #     element["itemtype"] = CLASS_MAP[category_idx]
             else:
                 for selector in record['css_selector']:
-                    soup = segmenter.soup
+                    soup = splitter.soup
                     element = soup.select(selector)[0]
                     element['itemscope'] = None
                     element['itemtype'] = CLASS_MAP[max_idx]
 
-    result = segmenter.soup.prettify()
+    result = splitter.soup.prettify()
 
     if output:
         try:
