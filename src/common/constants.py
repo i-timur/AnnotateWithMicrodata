@@ -1,6 +1,6 @@
 CONFIDENCE_THRESHOLD = 0.75
 
-EMPTY_CATEGORY = "Skip"
+ID_ATTR = "uid"
 
 CLASS_MAP = {
     0: "https://schema.org/Product",

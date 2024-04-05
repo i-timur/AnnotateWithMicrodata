@@ -4,19 +4,21 @@ import bs4
 
 from bs4 import BeautifulSoup
 
+from src.common.constants import ID_ATTR
+
 class Segmenter:
     def __init__(self):
         self.soup = None
 
-    def segment_html(self, html: str, clear_tree: bool = True) -> dict:
-        self.soup = BeautifulSoup(html, "html.parser")
+    def segment_html(self, html, clear_tree: bool = False) -> dict:
+        self.soup = BeautifulSoup(html, 'html.parser')
         self.__pruning()
         self.__partial_tree_matching()
         self.__backtracking()
         result = self.__output()
 
         if clear_tree:
-            self.__clear_tree()
+            self.clear_tree()
 
         return result
 
@@ -147,7 +149,7 @@ class Segmenter:
         else:
             return node.name
 
-    def __get_css_selector(self, node: Any) -> str:
+    def get_css_selector(self, node: Any) -> str:
         path = [self.__get_element(node)]
         for parent in node.parents:
             if parent.name == "[document]":
@@ -157,7 +159,7 @@ class Segmenter:
 
         return ' > '.join(path)
 
-    def __output(self) -> dict:
+    def __output(self, use_id: bool = True) -> dict:
         segment_ids = []
         record_id = 0
         segments = dict()
@@ -165,12 +167,14 @@ class Segmenter:
         for i, block in enumerate(self.blocks):
             texts = []
             css_selectors = []
+            unique_ids = []
 
             for node in block:
                 for text in node.stripped_strings:
                     texts.append(text)
 
-                css_selectors.append(self.__get_css_selector(node))
+                css_selectors.append(self.get_css_selector(node))
+                unique_ids.append(node[ID_ATTR])
 
             if len(texts) == 0:
                 continue
@@ -184,19 +188,23 @@ class Segmenter:
 
             if segment_id not in segments:
                 segments[segment_id] = {"segment_id": int(segment_id),
-                                        "css_selector": self.__get_css_selector(block[0].parent), "records": []}
+                                        "css_selector": self.get_css_selector(block[0].parent), "records": []}
 
             segments[segment_id]["records"].append(
                 {"record_id": record_id, "texts": texts, "css_selector": css_selectors})
+
+            if use_id:
+                segments[segment_id]["records"][-1]["unique_ids"] = unique_ids
+
             record_id += 1
 
         return segments
 
-    def __clear_tree(self) -> None:
+    def clear_tree(self) -> None:
         if not self.soup:
             raise ValueError("Soup is not instantiated.")
 
-        attributes = ["lid", "sn", "extracted", "sid"]
+        attributes = ["lid", "sn", "extracted", "sid", ID_ATTR]
 
         for attribute in attributes:
             for node in self.soup.find_all(attrs={attribute: True}):

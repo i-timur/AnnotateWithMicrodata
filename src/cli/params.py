@@ -9,6 +9,8 @@ class HTMLInput(click.ParamType):
         if os.path.exists(os.path.expanduser(value)):
             with open(os.path.expanduser(value), "rt") as file:
                 html = file.read()
+        elif value.startswith('http://') or value.startswith('https://'):
+            self.fail(f'URL input is not supported yet', param, ctx)
         else:
             html = value
 
