@@ -35,7 +35,7 @@ def clean_html(html_content, valid_xpaths):
     :param valid_xpaths: Paths of the elements to keep.
     :return: HTML content with only the elements that are in the valid_xpaths.
     """
-    parser = etree.HTMLParser()
+    parser = etree.HTMLParser(remove_blank_text=True)
     tree = etree.fromstring(html_content, parser)
 
     for path in valid_xpaths:
@@ -48,9 +48,11 @@ def clean_html(html_content, valid_xpaths):
                 element.set('preserve', None)
 
                 for ancestor in element.iterancestors():
-                    ancestor.set('preserve', None)
+                    if ancestor.attrib:
+                        ancestor.set('preserve', None)
                 for descendant in element.iterdescendants():
-                    descendant.set('preserve', None)
+                    if descendant.attrib:
+                        descendant.set('preserve', None)
 
     for element in tree.xpath('//*[not(@preserve)]'):
         element.getparent().remove(element)

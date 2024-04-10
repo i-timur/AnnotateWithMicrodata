@@ -56,11 +56,13 @@ def annotate(html, output, skip_products, confidence_threshold, save_preprocesse
     logger.info('Segmenting HTML content')
     splitter = Segmenter()
     segments = splitter.segment_html(cleaned_html)
-    logger.info(f'Segmented {len(segments)} blocks')
+    logger.info(f'Segmented {len(segments)} block(s)')
 
     logger.info('Classifying segments')
     classifier = Classifier()
     classified_segments = []
+
+    added_items = dict()
 
     for segment_id, segment in segments.items():
         for record in segment["records"]:
@@ -79,8 +81,9 @@ def annotate(html, output, skip_products, confidence_threshold, save_preprocesse
             if proba[max_idx] > confidence_threshold:
                 for selector in record['unique_ids']:
                     classified_segments.append((selector, CLASS_MAP[max_idx]))
+                    added_items[CLASS_MAP[max_idx]] = added_items.get(CLASS_MAP[max_idx], 0) + 1
 
-    logger.info(f'Classified {len(classified_segments)} records')
+    logger.info(f'Classified {len(classified_segments)} record(s)')
 
     splitter.soup = soup
 
@@ -105,5 +108,9 @@ def annotate(html, output, skip_products, confidence_threshold, save_preprocesse
             click.echo(f'Error writing to file: {error}')
     else:
         click.echo(result)
+
+    for itemtype, count in added_items.items():
+        if count:
+            logger.info(f'Added {count} {itemtype.split("/")[3]}(s)')
 
     click.echo('Done!')
