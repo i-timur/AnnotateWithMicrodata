@@ -111,6 +111,6 @@ def annotate(html, output, skip_products, confidence_threshold, save_preprocesse
 
     for itemtype, count in added_items.items():
         if count:
-            logger.info(f'Added {count} {itemtype.split("/")[3]}(s)')
+            logger.info(f'Annotated {count} {itemtype.split("/")[3]}(s)')
 
     click.echo('Done!')
