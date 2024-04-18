@@ -2,16 +2,15 @@ import os
 
 import click
 import click_log
-
 from bs4 import BeautifulSoup
 
 from src.classification.classifier import Classifier
 from src.classification.preprocessor import Preprocessor
-from src.common.constants import CONFIDENCE_THRESHOLD, CLASS_MAP, ID_ATTR
-from src.cli.params import HTMLInput
 from src.classification.segmenter import Segmenter
+from src.cli.params import HTMLInput, SkipItems
+from src.common.constants import CONFIDENCE_THRESHOLD, CLASS_MAP, ID_ATTR
 from src.common.log import logger
-from src.common.utils import clear_string, clean_html, set_unique_ids, remove_unique_ids, change_filename
+from src.common.utils import clear_string, clean_html, set_unique_ids, remove_unique_ids
 
 
 @click.group()
@@ -22,10 +21,10 @@ def cli():
 @click_log.simple_verbosity_option(logger, help='Output logging information', required=False)
 @click.argument('html', type=HTMLInput(), required=True)
 @click.option('-o', '--output', 'output', type=str, help='Path to the output file', required=False)
-@click.option('-s', '--skip-products', 'skip_products', is_flag=True, help='Skip items that are related to product entity', required=False)
+@click.option('-s', '--skip', 'skip_items', type=SkipItems(), help='Skip passed items (Product, Book, etc.)', required=False)
 @click.option('-t', '--threshold', 'confidence_threshold', type=float, help='Confidence threshold for classification', required=False, default=CONFIDENCE_THRESHOLD)
 @click.option('--save-preprocessed', 'save_preprocessed', is_flag=True, help='Save preprocessed HTML content to file', required=False)
-def annotate(html, output, skip_products, confidence_threshold, save_preprocessed):
+def annotate(html, output, skip_items, confidence_threshold, save_preprocessed):
     click.echo('Starting annotation process')
 
     soup = BeautifulSoup(html, 'html.parser')
@@ -75,7 +74,7 @@ def annotate(html, output, skip_products, confidence_threshold, save_preprocesse
             proba = classifier.classify(text)
             max_idx = proba.argmax()
 
-            if skip_products and max_idx == 0:
+            if skip_items and CLASS_MAP[max_idx] in skip_items:
                 continue
 
             if proba[max_idx] > confidence_threshold:

@@ -2,6 +2,9 @@ import os.path
 
 import click
 
+from src.common.constants import CLASS_MAP
+
+
 class HTMLInput(click.ParamType):
     name = "HTMLInput"
 
@@ -19,3 +22,17 @@ class HTMLInput(click.ParamType):
             return html
         else:
             self.fail(f'HTML input is not valid', param, ctx)
+
+class SkipItems(click.ParamType):
+    name = "SkipItems"
+
+    def convert(self, value, param, ctx):
+        types = map(lambda schema: schema.split('/')[3], [item for _, item in CLASS_MAP.items()])
+
+        values = value.split(',')
+
+        for item in values:
+            if item not in types:
+                self.fail(f'{item} is not a valid type', param, ctx)
+
+        return list(map(lambda item: 'https://schema.org/' + item, values))
