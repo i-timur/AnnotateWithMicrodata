@@ -1,6 +1,6 @@
 import bs4
 
-from src.annotation.utils import check_duration
+from src.annotation.utils import is_duration
 
 
 def find_title(node: bs4.element.Tag):
@@ -46,7 +46,7 @@ def find_duration(node: bs4.element.Tag):
             if duration:
                 return duration
         elif isinstance(child, bs4.element.NavigableString):
-            if check_duration(child):
+            if is_duration(child):
                 return child.parent
 
     return None
