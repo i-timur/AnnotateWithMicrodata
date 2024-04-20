@@ -11,7 +11,7 @@ from src.cli.params import HTMLInput, SkipItems
 from src.common.constants import CONFIDENCE_THRESHOLD, CLASS_MAP, ID_ATTR
 from src.common.log import logger
 from src.common.utils import clear_string, clean_html, set_unique_ids, remove_unique_ids
-
+from src.annotation.classes import ANNOTATION_FUNCTIONS
 
 @click.group()
 def cli():
@@ -88,9 +88,14 @@ def annotate(html, output, skip_items, confidence_threshold, save_preprocessed):
 
     for selector, itemtype in classified_segments:
         for element in soup.select(f'[{ID_ATTR}="{selector}"]'):
+            func = ANNOTATION_FUNCTIONS.get(itemtype, None)
+            if func:
+                func(element)
+            else:
+                logger.warn(f'No annotation function found for {itemtype}')
+                element['itemscope'] = None
+                element['itemtype'] = itemtype
             logger.info(f'Annoted {splitter.get_css_selector(element)} with {itemtype}')
-            element['itemscope'] = None
-            element['itemtype'] = itemtype
 
     logger.info('Removing unique ids from HTML content')
     remove_unique_ids(soup)
