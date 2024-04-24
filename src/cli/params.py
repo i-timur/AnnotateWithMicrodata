@@ -27,7 +27,7 @@ class SkipItems(click.ParamType):
     name = "SkipItems"
 
     def convert(self, value, param, ctx):
-        types = map(lambda schema: schema.split('/')[3], [item for _, item in CLASS_MAP.items()])
+        types = list(map(lambda schema: schema.split('/')[3], [item for _, item in CLASS_MAP.items()]))
 
         values = value.split(',')
 
